@@ -1,0 +1,20 @@
+Practice Environment
+
+[GPU Spec]
+1. manufacturer: nVidia
+2. product name: GeForce MX450
+3. core : 896
+4. TMUS : 56
+5. ROPS : 32
+6. Memory : 2GB GDDR5 64bit 64GB/s
+7. Bus : 64bit
+8. clock : Core 1035MHz, Memory 2000MHz 8Gbps effective
+9. CUDA version : 7.5
+10. L1 Cache : 64KB / SM
+11. SM : 14
+12. L2 Cache : 512KB
+13. FP16(half) : 4.570 TFLOPS
+14. FP32(float) : 2.285 TFLOPS
+15. FP64(double) : 71.40GFLOPS
+16. Bus : PCIe 4.0 x 4
+* source : https://www.techpowerup.com/gpu-specs/geforce-mx450-30-5w-8gbps.c3717
