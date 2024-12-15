@@ -17,4 +17,5 @@ Practice Environment
 14. FP32(float) : 2.285 TFLOPS
 15. FP64(double) : 71.40GFLOPS
 16. Bus : PCIe 4.0 x 4
+17. OS : Windows 11
 * source : https://www.techpowerup.com/gpu-specs/geforce-mx450-30-5w-8gbps.c3717
