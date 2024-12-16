@@ -144,9 +144,35 @@ int main(int argc, char **argv) {
 
 /*
 output:
-[host] C:\coding\CudaRuntime1\x64\Debug\CudaRuntime1.exe Starting...
+C:\coding\Cuda\x64\Debug>nvprof ./Cuda.exe
+[host] ./Cuda.exe Starting...
+==20084== NVPROF is profiling process 20084, command: ./Cuda.exe
 [host] Using Device 0: NVIDIA GeForce MX450
 [host] Vector size 16777216
 [host] sumArraysOnGPU <<<16384, 1024>>> Time elapsed 0.000000 sec
 [host] Arrays match.
+
+==20084== Profiling application: ./Cuda.exe
+==20084== Warning: 36 API trace records have same start and end timestamps.
+This can happen because of short execution duration of CUDA APIs and low timer resolution on the underlying operating system.
+==20084== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   62.71%  43.880ms         2  21.940ms  21.776ms  22.104ms  [CUDA memcpy HtoD]
+                   31.41%  21.979ms         1  21.979ms  21.979ms  21.979ms  [CUDA memcpy DtoH]
+                    5.88%  4.1108ms         1  4.1108ms  4.1108ms  4.1108ms  sumArraysOnGPU(float*, float*, float*, int)
+      API calls:   38.87%  138.87ms         1  138.87ms  138.87ms  138.87ms  cudaSetDevice
+                   26.96%  96.324ms         1  96.324ms  96.324ms  96.324ms  cudaLaunchKernel
+                   20.71%  73.983ms         3  24.661ms  22.211ms  26.619ms  cudaMemcpy
+                    9.82%  35.090ms         1  35.090ms  35.090ms  35.090ms  cuDevicePrimaryCtxRelease
+                    2.95%  10.536ms         3  3.5121ms  166.00us  9.6766ms  cudaMalloc
+                    0.56%  1.9937ms         3  664.57us  398.20us  1.1074ms  cudaFree
+                    0.06%  217.50us         1  217.50us  217.50us  217.50us  cuModuleGetLoadingMode
+                    0.06%  211.40us       114  1.8540us       0ns  196.00us  cuDeviceGetAttribute
+                    0.01%  46.400us         1  46.400us  46.400us  46.400us  cuLibraryUnload
+                    0.00%  5.9000us         1  5.9000us  5.9000us  5.9000us  cudaGetDeviceProperties
+                    0.00%  2.4000us         3     800ns     100ns  2.0000us  cuDeviceGetCount
+                    0.00%  1.7000us         1  1.7000us  1.7000us  1.7000us  cuDeviceTotalMem
+                    0.00%  1.1000us         2     550ns     100ns  1.0000us  cuDeviceGet
+                    0.00%  1.0000us         1  1.0000us  1.0000us  1.0000us  cuDeviceGetName
+                    0.00%     500ns         1     500ns     500ns     500ns  cuDeviceGetLuid
 */
