@@ -53,6 +53,56 @@ int recursiveReduce(int* data, const int size) {
     }
     return recursiveReduce(data, stride);
 }
+__global__ void warmup(int* g_idata, int* g_odata, const int n) {
+    // set thread ID
+    unsigned int tid = threadIdx.x;
+    unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // convert global data pointer to the local pointer of this block
+    int* idata = g_idata + blockIdx.x * blockDim.x;
+
+    // boundary check
+    if (idx >= n) return;
+
+    // in-place reduction in global memory
+    for (int stride = 1; stride < blockDim.x; stride *= 2) {
+        if ((tid % (2 * stride)) == 0) {
+            idata[tid] += idata[tid + stride];
+        }
+
+        // synchronize within block
+        __syncthreads();
+    }
+    // write result for this block to global memory
+    if (tid == 0) {
+        g_odata[blockIdx.x] = idata[0];
+    }
+}
+__global__ void reduceNeighbored(int* g_idata, int* g_odata, const int n) {
+    // set thread ID
+    unsigned int tid = threadIdx.x;
+    unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // convert global data pointer to the local pointer of this block
+    int* idata = g_idata + blockIdx.x * blockDim.x;
+
+    // boundary check
+    if (idx >= n) return;
+
+    // in-place reduction in global memory
+    for (int stride = 1; stride < blockDim.x; stride *= 2) {
+        if ((tid % (2 * stride)) == 0) {
+            idata[tid] += idata[tid + stride];
+        }
+
+        // synchronize within block
+        __syncthreads();
+    }
+    // write result for this block to global memory
+    if (tid == 0) {
+        g_odata[blockIdx.x] = idata[0];
+    }
+}
 __global__ void reduceNeighboredLess(int* g_idata, int* g_odata, const int n) {
     // set thread ID
     unsigned int tid = threadIdx.x;
@@ -79,35 +129,8 @@ __global__ void reduceNeighboredLess(int* g_idata, int* g_odata, const int n) {
     if (tid == 0) {
         g_odata[blockIdx.x] = idata[0];
     }
-}__global__ void reduceNeighbored(int* g_idata, int* g_odata, const int n) {
-    // set thread ID
-    unsigned int tid = threadIdx.x;
-    unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // convert global data pointer to the local pointer of this block
-    int* idata = g_idata + blockIdx.x * blockDim.x;
-
-    // boundary check
-    if (idx >= n) return;
-
-    // in-place reduction in global memory
-    for (int stride = 1; stride < blockDim.x; stride *= 2) {
-        if ((tid % (2 * stride)) == 0) {
-            idata[tid] += idata[tid + stride];
-        }
-
-        // synchronize within block
-        __syncthreads();
-    }
-    // write result for this block to global memory
-    if (tid == 0) {
-        g_odata[blockIdx.x] = idata[0];
-    }
 }
 __global__ void reduceInterleaved(int* g_idata, int* g_odata, const int n) {
-
-}
-__global__ void warmup(int* g_idata, int* g_odata, const int n) {
     // set thread ID
     unsigned int tid = threadIdx.x;
     unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -132,6 +155,7 @@ __global__ void warmup(int* g_idata, int* g_odata, const int n) {
         g_odata[blockIdx.x] = idata[0];
     }
 }
+
 int main(int argc, char** argv) {
     printf("[host] %s Starting...\n", argv[0]);
 
@@ -232,7 +256,7 @@ int main(int argc, char** argv) {
 output:
 C:\coding\Cuda\x64\Debug>nvprof ./Cuda
 [host] ./Cuda Starting...
-==24436== NVPROF is profiling process 24436, command: ./Cuda
+==23752== NVPROF is profiling process 23752, command: ./Cuda
 [host] Using Device 0: NVIDIA GeForce MX450
 [host] Data size : 16777216
 [host] Execution configure : grid(32768, 1), block(512, 1)
@@ -240,32 +264,32 @@ C:\coding\Cuda\x64\Debug>nvprof ./Cuda
 [host] gpu reduceNeighbored : grid(32768, 1), block(512, 1), cpu_sum=2139095040, gpu_sum=2139095040
 [host] gpu reduceNeighboredLess : grid(32768, 1), block(512, 1), cpu_sum=2139095040, gpu_sum=2139095040
 [host] gpu reduceInterleaved : grid(32768, 1), block(512, 1), cpu_sum=2139095040, gpu_sum=2139095040
-==24436== Profiling application: ./Cuda
-==24436== Warning: 14 API trace records have same start and end timestamps.
+==23752== Profiling application: ./Cuda
+==23752== Warning: 31 API trace records have same start and end timestamps.
 This can happen because of short execution duration of CUDA APIs and low timer resolution on the underlying operating system.
-==24436== Profiling result:
+==23752== Profiling result:
             Type  Time(%)      Time     Calls       Avg       Min       Max  Name
- GPU activities:   72.81%  90.984ms         4  22.746ms  22.222ms  23.482ms  [CUDA memcpy HtoD]
-                   11.07%  13.836ms         1  13.836ms  13.836ms  13.836ms  reduceNeighbored(int*, int*, int)
-                    7.80%  9.7509ms         1  9.7509ms  9.7509ms  9.7509ms  reduceNeighboredLess(int*, int*, int)
-                    7.49%  9.3621ms         1  9.3621ms  9.3621ms  9.3621ms  warmup(int*, int*, int)
-                    0.70%  875.58us         1  875.58us  875.58us  875.58us  reduceInterleaved(int*, int*, int)
-                    0.13%  156.96us         4  39.240us  38.528us  40.064us  [CUDA memcpy DtoH]
-      API calls:   35.38%  90.755ms         8  11.344ms  160.40us  23.252ms  cudaMemcpy
-                   28.42%  72.899ms         1  72.899ms  72.899ms  72.899ms  cudaSetDevice
-                   14.15%  36.289ms         8  4.5362ms  520.10us  13.913ms  cudaDeviceSynchronize
-                   11.58%  29.707ms         1  29.707ms  29.707ms  29.707ms  cudaDeviceReset
-                    9.78%  25.089ms         4  6.2722ms  55.400us  24.858ms  cudaLaunchKernel
-                    0.52%  1.3405ms         2  670.25us  464.80us  875.70us  cudaFree
-                    0.14%  371.10us         2  185.55us  82.500us  288.60us  cudaMalloc
-                    0.01%  22.600us         1  22.600us  22.600us  22.600us  cuLibraryUnload
-                    0.01%  21.400us       114     187ns       0ns  2.7000us  cuDeviceGetAttribute
-                    0.00%  5.5000us         1  5.5000us  5.5000us  5.5000us  cudaGetDeviceProperties
-                    0.00%  4.8000us         1  4.8000us  4.8000us  4.8000us  cuDeviceGetName
-                    0.00%  2.5000us         1  2.5000us  2.5000us  2.5000us  cuDeviceTotalMem
-                    0.00%  2.3000us         3     766ns       0ns  2.0000us  cuDeviceGetCount
-                    0.00%  2.2000us         1  2.2000us  2.2000us  2.2000us  cuModuleGetLoadingMode
-                    0.00%     900ns         2     450ns     100ns     800ns  cuDeviceGet
+ GPU activities:   66.40%  92.763ms         4  23.191ms  22.453ms  23.942ms  [CUDA memcpy HtoD]
+                    9.91%  13.842ms         1  13.842ms  13.842ms  13.842ms  warmup(int*, int*, int)
+                    9.90%  13.837ms         1  13.837ms  13.837ms  13.837ms  reduceNeighbored(int*, int*, int)
+                    6.98%  9.7502ms         1  9.7502ms  9.7502ms  9.7502ms  reduceNeighboredLess(int*, int*, int)
+                    6.70%  9.3624ms         1  9.3624ms  9.3624ms  9.3624ms  reduceInterleaved(int*, int*, int)
+                    0.11%  158.46us         4  39.615us  39.232us  40.224us  [CUDA memcpy DtoH]
+      API calls:   35.53%  92.507ms         8  11.563ms  209.00us  23.592ms  cudaMemcpy
+                   23.64%  61.558ms         1  61.558ms  61.558ms  61.558ms  cudaSetDevice
+                   18.90%  49.201ms         8  6.1501ms  513.60us  13.922ms  cudaDeviceSynchronize
+                   11.59%  30.185ms         1  30.185ms  30.185ms  30.185ms  cudaDeviceReset
+                    9.74%  25.352ms         4  6.3381ms  55.300us  25.174ms  cudaLaunchKernel
+                    0.41%  1.0732ms         2  536.60us  352.30us  720.90us  cudaFree
+                    0.15%  402.70us         2  201.35us  103.60us  299.10us  cudaMalloc
+                    0.01%  27.000us         1  27.000us  27.000us  27.000us  cuLibraryUnload
+                    0.01%  18.900us       114     165ns       0ns  2.7000us  cuDeviceGetAttribute
+                    0.00%  7.2000us         1  7.2000us  7.2000us  7.2000us  cudaGetDeviceProperties
+                    0.00%  3.1000us         3  1.0330us     200ns  2.6000us  cuDeviceGetCount
+                    0.00%  2.4000us         1  2.4000us  2.4000us  2.4000us  cuDeviceTotalMem
+                    0.00%  2.3000us         1  2.3000us  2.3000us  2.3000us  cuModuleGetLoadingMode
+                    0.00%  1.2000us         2     600ns     200ns  1.0000us  cuDeviceGet
+                    0.00%     800ns         1     800ns     800ns     800ns  cuDeviceGetName
                     0.00%     300ns         1     300ns     300ns     300ns  cuDeviceGetLuid
                     0.00%     100ns         1     100ns     100ns     100ns  cuDeviceGetUuid
 */
