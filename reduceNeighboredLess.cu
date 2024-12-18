@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
     cudaMemcpy(h_odata, d_odata, grid.x * sizeof(int), cudaMemcpyDeviceToHost);
     gpu_sum = 0;
     for (int i = 0; i < grid.x; i++) gpu_sum += h_odata[i];
-    printf("[host] gpu Neighbored : grid(%d, %d), block(%d, %d), cpu_sum=%d, gpu_sum=%d\n",
+    printf("[host] gpu NeighboredLess : grid(%d, %d), block(%d, %d), cpu_sum=%d, gpu_sum=%d\n",
         grid.x, grid.y, block.x, block.y, cpu_sum, gpu_sum);
 
     // free host memory
@@ -224,7 +224,7 @@ C:\coding\Cuda\x64\Debug>nvprof ./Cuda
 [host] Execution configure : grid(32768, 1), block(512, 1)
 [host] gpu warmup : grid(32768, 1), block(512, 1), cpu_sum=2139095040, gpu_sum=2139095040
 [host] gpu Neighbored : grid(32768, 1), block(512, 1), cpu_sum=2139095040, gpu_sum=2139095040
-[host] gpu Neighbored : grid(32768, 1), block(512, 1), cpu_sum=2139095040, gpu_sum=2139095040
+[host] gpu NeighboredLess : grid(32768, 1), block(512, 1), cpu_sum=2139095040, gpu_sum=2139095040
 ==25948== Profiling application: ./Cuda
 ==25948== Warning: 21 API trace records have same start and end timestamps.
 This can happen because of short execution duration of CUDA APIs and low timer resolution on the underlying operating system.
