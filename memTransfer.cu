@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     unsigned int nbytes = size * sizeof(float);
 
     // allocate the host memory
-    float *h_A = (float *)malloc(nbytes);
+    float* h_A = (float*)malloc(nbytes);
 
     // allocate the device memory
     float* d_A;
@@ -56,32 +56,27 @@ int main(int argc, char** argv) {
 output:
 c:\coding\Cuda\x64\Debug>nvprof ./Cuda.exe
 [host] ./Cuda.exe Starting...
-==11068== NVPROF is profiling process 11068, command: ./Cuda.exe
+==20568== NVPROF is profiling process 20568, command: ./Cuda.exe
 [host] Using Device 0: NVIDIA GeForce MX450
-[host] value = 3.140000
-[Device] devData : 3.140000
-[host] value = 5.140000
-==11068== Profiling application: ./Cuda.exe
-==11068== Warning: 29 API trace records have same start and end timestamps.
+==20568== Profiling application: ./Cuda.exe
+==20568== Warning: 34 API trace records have same start and end timestamps.
 This can happen because of short execution duration of CUDA APIs and low timer resolution on the underlying operating system.
-==11068== Profiling result:
+==20568== Profiling result:
             Type  Time(%)      Time     Calls       Avg       Min       Max  Name
- GPU activities:   93.63%  36.192us         1  36.192us  36.192us  36.192us  checkGlobalVariable(void)
-                    4.64%  1.7920us         1  1.7920us  1.7920us  1.7920us  [CUDA memcpy DtoH]
-                    1.74%     672ns         1     672ns     672ns     672ns  [CUDA memcpy HtoD]
-      API calls:   69.89%  82.003ms         1  82.003ms  82.003ms  82.003ms  cudaSetDevice
-                   26.27%  30.823ms         1  30.823ms  30.823ms  30.823ms  cudaDeviceReset
-                    3.22%  3.7805ms         1  3.7805ms  3.7805ms  3.7805ms  cudaMemcpyToSymbol
-                    0.42%  488.90us         1  488.90us  488.90us  488.90us  cudaMemcpyFromSymbol
-                    0.16%  189.60us         1  189.60us  189.60us  189.60us  cudaLaunchKernel
-                    0.02%  20.200us       114     177ns       0ns  3.0000us  cuDeviceGetAttribute
-                    0.01%  16.800us         1  16.800us  16.800us  16.800us  cuLibraryUnload
-                    0.00%  3.7000us         1  3.7000us  3.7000us  3.7000us  cudaGetDeviceProperties
-                    0.00%  2.3000us         3     766ns     100ns  2.0000us  cuDeviceGetCount
-                    0.00%  1.7000us         1  1.7000us  1.7000us  1.7000us  cuDeviceTotalMem
-                    0.00%  1.6000us         1  1.6000us  1.6000us  1.6000us  cuModuleGetLoadingMode
+ GPU activities:   52.14%  5.8245ms         1  5.8245ms  5.8245ms  5.8245ms  [CUDA memcpy HtoD]
+                   47.86%  5.3469ms         1  5.3469ms  5.3469ms  5.3469ms  [CUDA memcpy DtoH]
+      API calls:   65.23%  64.969ms         1  64.969ms  64.969ms  64.969ms  cudaSetDevice
+                   22.25%  22.166ms         1  22.166ms  22.166ms  22.166ms  cudaDeviceReset
+                   12.04%  11.997ms         2  5.9983ms  5.6629ms  6.3338ms  cudaMemcpy
+                    0.25%  247.30us         1  247.30us  247.30us  247.30us  cudaFree
+                    0.20%  194.90us         1  194.90us  194.90us  194.90us  cudaMalloc
+                    0.02%  19.800us       114     173ns       0ns  3.5000us  cuDeviceGetAttribute
+                    0.00%  3.8000us         1  3.8000us  3.8000us  3.8000us  cudaGetDeviceProperties
+                    0.00%  2.5000us         3     833ns     100ns  2.2000us  cuDeviceGetCount
+                    0.00%  2.1000us         1  2.1000us  2.1000us  2.1000us  cuDeviceTotalMem
+                    0.00%  1.8000us         1  1.8000us  1.8000us  1.8000us  cuModuleGetLoadingMode
                     0.00%  1.0000us         2     500ns     100ns     900ns  cuDeviceGet
-                    0.00%     800ns         1     800ns     800ns     800ns  cuDeviceGetName
-                    0.00%     300ns         1     300ns     300ns     300ns  cuDeviceGetLuid
-                    0.00%     100ns         1     100ns     100ns     100ns  cuDeviceGetUuid
+                    0.00%     900ns         1     900ns     900ns     900ns  cuDeviceGetName
+                    0.00%     400ns         1     400ns     400ns     400ns  cuDeviceGetLuid
+                    0.00%     200ns         1     200ns     200ns     200ns  cuDeviceGetUuid
 */
